@@ -1,0 +1,39 @@
+# Environment
+.env
+*.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# IDE
+.vscode/
+.idea/
+
+# Models (if downloaded locally)
+models/
+*.bin
+*.safetensors
+
+# Test images
+test_receipts/
+*.jpg
+*.png
+*.jpeg
+
+# Outputs
+outputs/
+results/
+
+
+
