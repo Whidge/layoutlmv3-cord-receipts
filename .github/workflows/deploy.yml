@@ -1,0 +1,37 @@
+name: Push to Replicate
+
+on:
+  workflow_dispatch:
+    inputs:
+      model_name:
+        description: 'Model name (e.g., whidge/layoutlmv3-cord-receipts)'
+        required: true
+        default: 'whidge/layoutlmv3-cord-receipts'
+  push:
+    branches:
+      - main
+    paths:
+      - 'replicate_deployment/**'
+
+jobs:
+  push_to_replicate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Free disk space
+        uses: jlumbroso/free-disk-space@v1.3.1
+        with:
+          tool-cache: false
+          docker-images: false
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Cog
+        uses: replicate/setup-cog@v2
+        with:
+          token: ${{ secrets.REPLICATE_CLI_AUTH_TOKEN }}
+
+      - name: Push model to Replicate
+        working-directory: replicate_deployment
+        run: cog push r8.im/${{ github.event.inputs.model_name || 'whidge/layoutlmv3-cord-receipts' }}
+
