@@ -1,21 +1,13 @@
 build:
   gpu: true
-  # Using Python base image instead of CUDA to avoid I/O errors
-  # CUDA will still be available at runtime on Replicate's GPU instances
+  cuda: "11.8"
   python_version: "3.10"
   system_packages:
     - libgl1-mesa-glx
     - libglib2.0-0
     - tesseract-ocr
     - libtesseract-dev
-  python_packages:
-    - torch>=2.0.0
-    - transformers>=4.30.0
-    - pillow>=9.0.0
-    - numpy>=1.21.0
-    - easyocr>=1.7.0
-    - opencv-python-headless>=4.5.0
-    - cog>=0.9.0
+  python_requirements: "requirements.txt"
 
 predict: "predict.py:Predictor"
 

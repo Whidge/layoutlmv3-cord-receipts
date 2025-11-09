@@ -1,4 +1,4 @@
-name: Push to Replicate
+name: Deploy to Replicate
 
 on:
   workflow_dispatch:
@@ -12,10 +12,12 @@ on:
       - main
     paths:
       - 'replicate_deployment/**'
+      - '.github/workflows/deploy.yml'
 
 jobs:
-  push_to_replicate:
+  deploy:
     runs-on: ubuntu-latest
+    name: Build and push to Replicate
     steps:
       - name: Free disk space
         uses: jlumbroso/free-disk-space@v1.3.1
@@ -31,7 +33,12 @@ jobs:
         with:
           token: ${{ secrets.REPLICATE_CLI_AUTH_TOKEN }}
 
-      - name: Push model to Replicate
+      - name: Build and push model to Replicate
         working-directory: replicate_deployment
-        run: cog push r8.im/${{ github.event.inputs.model_name || 'whidge/layoutlmv3-cord-receipts' }}
+        run: |
+          echo "🚀 Building and pushing model to Replicate..."
+          MODEL_NAME="${{ github.event.inputs.model_name || 'whidge/layoutlmv3-cord-receipts' }}"
+          echo "Model: r8.im/${MODEL_NAME}"
+          cog push "r8.im/${MODEL_NAME}"
+          echo "✅ Successfully deployed to Replicate!"
 
