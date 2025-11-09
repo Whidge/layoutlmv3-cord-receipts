@@ -39,6 +39,24 @@ jobs:
           echo "🚀 Building and pushing model to Replicate..."
           MODEL_NAME="${{ github.event.inputs.model_name || 'whidge/layoutlmv3-cord-receipts' }}"
           echo "Model: r8.im/${MODEL_NAME}"
-          cog push "r8.im/${MODEL_NAME}"
-          echo "✅ Successfully deployed to Replicate!"
+          
+          # Retry logic for network issues
+          MAX_RETRIES=3
+          RETRY_COUNT=0
+          
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            if cog push "r8.im/${MODEL_NAME}"; then
+              echo "✅ Successfully deployed to Replicate!"
+              exit 0
+            else
+              RETRY_COUNT=$((RETRY_COUNT + 1))
+              if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+                echo "⚠️ Push failed, retrying in 30 seconds... (Attempt $RETRY_COUNT/$MAX_RETRIES)"
+                sleep 30
+              else
+                echo "❌ Failed after $MAX_RETRIES attempts"
+                exit 1
+              fi
+            fi
+          done
 
