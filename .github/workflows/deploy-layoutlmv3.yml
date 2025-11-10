@@ -1,0 +1,61 @@
+name: Deploy LayoutLMv3 to Replicate
+
+on:
+  workflow_dispatch:
+    inputs:
+      model_name:
+        description: 'Model name (e.g., whidge/layoutlmv3)'
+        required: true
+        default: 'whidge/layoutlmv3'
+  push:
+    branches:
+      - main
+    paths:
+      - 'replicate_deployment/layoutlmv3/**'
+      - '.github/workflows/deploy-layoutlmv3.yml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Build and push LayoutLMv3 to Replicate
+    steps:
+      - name: Free disk space
+        uses: jlumbroso/free-disk-space@v1.3.1
+        with:
+          tool-cache: false
+          docker-images: false
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Cog
+        uses: replicate/setup-cog@v2
+        with:
+          token: ${{ secrets.REPLICATE_CLI_AUTH_TOKEN }}
+
+      - name: Build and push LayoutLMv3 to Replicate
+        working-directory: replicate_deployment/layoutlmv3
+        run: |
+          echo "🚀 Building and pushing LayoutLMv3 to Replicate..."
+          MODEL_NAME="${{ github.event.inputs.model_name || 'whidge/layoutlmv3' }}"
+          echo "Model: r8.im/${MODEL_NAME}"
+          
+          MAX_RETRIES=3
+          RETRY_COUNT=0
+          
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            if cog push "r8.im/${MODEL_NAME}"; then
+              echo "✅ Successfully deployed LayoutLMv3 to Replicate!"
+              exit 0
+            else
+              RETRY_COUNT=$((RETRY_COUNT + 1))
+              if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+                echo "⚠️ Push failed, retrying in 30 seconds... (Attempt $RETRY_COUNT/$MAX_RETRIES)"
+                sleep 30
+              else
+                echo "❌ Failed after $MAX_RETRIES attempts"
+                exit 1
+              fi
+            fi
+          done
+
